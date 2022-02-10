@@ -24,3 +24,6 @@ text_client-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+# Swap file
+*.swp

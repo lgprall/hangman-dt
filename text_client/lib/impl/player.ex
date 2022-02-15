@@ -11,7 +11,7 @@ defmodule TextClient.Impl.Player do
   }
     
 
-  @spec start() :: boolean
+  @spec start() :: :ok
   def start do
     game = Hangman.new_game
     tally = Hangman.tally(game)
@@ -20,36 +20,37 @@ defmodule TextClient.Impl.Player do
     interact( game, tally, stats)
   end
 
-  @spec interact(game, tally, stats) :: boolean
-  def interact(game = %{game_state: :initializing}, _tally, stats = %{ flag: 0 }) do
+  @spec interact(game, tally, stats) :: :ok
+  def interact(game, tally = %{game_state: :initializing}, stats = %{ flag: 0 }) do
     IO.puts( "Welcome to the game!" )
-    IO.puts( "I'm thinking of a word with #{int2wd(length(game.letters))} letters.
+    IO.puts( "I'm thinking of a word with #{int2wd(length(tally.letters))} letters.
 ")
     guess = prompt("What is your guess for the first letter? ")
-    {game, tally} = Hangman.make_move(game, guess)
+    tally = Hangman.make_move(game, guess)
     stats = %{stats | flag: 1}
 
     interact(game, tally, stats)
   end
 
-  def interact(game = %{game_state: :initializing}, _tally, stats ) do
-    IO.puts("This time I'm thinking of a word with #{int2wd(length(game.letters))} letters.
+  def interact(game, tally = %{game_state: :initializing}, stats ) do
+    IO.puts("This time I'm thinking of a word with #{int2wd(length(tally.letters))} letters.
 ")
     guess = prompt("What is your guess for the first letter? ")
-    {game, tally} = Hangman.make_move(game, guess)
+    tally = Hangman.make_move(game, guess)
 
     interact(game, tally, stats)
   end
 
-  def interact(game = %{game_state: :won}, _tally, stats ) do
+  def interact(game, tally = %{game_state: :won}, stats ) do
+    letters = Hangman.letters(game)
     IO.puts("Congratulatons, you won!
-The word was \"#{IO.ANSI.format([:green, game.letters])}\".")
+The word was \"#{IO.ANSI.format([:green, letters])}\".")
     stats = %{
       stats |
         games:   stats.games + 1,
         wins:    stats.wins + 1,
-        letters: stats.letters + length(game.letters),
-        guesses: stats.guesses + 7 - game.turns_left
+        letters: stats.letters + length(tally.letters),
+        guesses: stats.guesses + 7 - tally.turns_left
       }
 
     (prompt("\nPlay another game? ") == "y")
@@ -57,14 +58,15 @@ The word was \"#{IO.ANSI.format([:green, game.letters])}\".")
 
   end
 
-  def interact(game = %{game_state: :lost}, _tally, stats )do
+  def interact(game, tally = %{game_state: :lost}, stats )do
+    letters = Hangman.letters(game)
     IO.puts("Sorry. You lost.
-The word was \"#{IO.ANSI.format([:green, game.letters])}\".")
+The word was \"#{IO.ANSI.format([:green, letters])}\".")
     stats = %{
       stats |
         games:   stats.games + 1,
-        letters: stats.letters + length(game.letters),
-        guesses: stats.guesses + 7 - game.turns_left
+        letters: stats.letters + length(tally.letters),
+        guesses: stats.guesses + 7 - tally.turns_left
       }
 
     (prompt("\nTry again? ") == "y")
@@ -72,10 +74,10 @@ The word was \"#{IO.ANSI.format([:green, game.letters])}\".")
   end
 
   def interact(game,tally, stats) do
-    feedback(game,stats)
+    IO.puts(feedback(tally,stats))
     IO.puts IO.ANSI.format(show_stats(tally))
     guess = prompt("Next guess: ")
-    {game, tally} = Hangman.make_move(game, guess)
+    tally = Hangman.make_move(game, guess)
 
     interact(game, tally, stats)
   end
@@ -90,22 +92,10 @@ The word was \"#{IO.ANSI.format([:green, game.letters])}\".")
   end
   
 
-  def feedback(_game = %{game_state: :invalid}, _stats) do
-    IO.puts("That is not a vaid entry. It must be a lowercase \"a\" to \"z\".")
-  end
-
-  def feedback(_game = %{game_state: :already_used}, _stats) do
-    IO.puts("You have already used that letter.")
-  end
-
-  def feedback(_game = %{game_state: :good_guess}, _stats) do
-    IO.puts("Good guess.")
-  end
-
-  def feedback(game = %{game_state: :bad_guess}, _stats) do
-    IO.puts("Sorry. That letter is not in the word.")
-    %{game | turns_left: game.turns_left - 1}
-  end
+  def feedback(_tally = %{game_state: :invalid}, _stats), do: "That is not a vaid entry. It must be a lowercase \"a\" to \"z\"."
+  def feedback(_tally = %{game_state: :already_used}, _stats), do: "You have already used that letter."
+  def feedback(_tally = %{game_state: :good_guess}, _stats), do: "Good guess."
+  def feedback(_tally = %{game_state: :bad_guess}, _stats), do: "Sorry. That letter is not in the word."
 
   def again(_another = true, stats) do
     game = Hangman.new_game

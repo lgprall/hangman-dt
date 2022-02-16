@@ -11,9 +11,8 @@ defmodule TextClient.Impl.Player do
   }
     
 
-  @spec start() :: :ok
-  def start do
-    game = Hangman.new_game
+  @spec start(game) :: :ok
+  def start(game) do
     tally = Hangman.tally(game)
     stats = %{ games: 0, wins: 0, letters: 0, guesses: 0, flag: 0 }
 

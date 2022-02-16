@@ -21,9 +21,4 @@ defmodule Hangman do
     GenServer.call(game, {:tally} )
   end
 
-  @spec letters(game) :: String.t
-  def letters(game) do
-    (:sys.get_state(game)).letters
-  end
-
 end

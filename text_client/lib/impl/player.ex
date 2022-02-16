@@ -20,6 +20,7 @@ defmodule TextClient.Impl.Player do
   end
 
   @spec interact(game, tally, stats) :: :ok
+
   def interact(game, tally = %{game_state: :initializing}, stats = %{ flag: 0 }) do
     IO.puts( "Welcome to the game!" )
     IO.puts( "I'm thinking of a word with #{int2wd(length(tally.letters))} letters.
@@ -41,7 +42,7 @@ defmodule TextClient.Impl.Player do
   end
 
   def interact(game, tally = %{game_state: :won}, stats ) do
-    letters = Hangman.letters(game)
+    letters = (:sys.get_state(game)).letters
     IO.puts("Congratulatons, you won!
 The word was \"#{IO.ANSI.format([:green, letters])}\".")
     stats = %{
@@ -58,7 +59,7 @@ The word was \"#{IO.ANSI.format([:green, letters])}\".")
   end
 
   def interact(game, tally = %{game_state: :lost}, stats )do
-    letters = Hangman.letters(game)
+    letters = (:sys.get_state(game)).letters
     IO.puts("Sorry. You lost.
 The word was \"#{IO.ANSI.format([:green, letters])}\".")
     stats = %{
@@ -97,7 +98,7 @@ The word was \"#{IO.ANSI.format([:green, letters])}\".")
   def feedback(_tally = %{game_state: :bad_guess}, _stats), do: "Sorry. That letter is not in the word."
 
   def again(_another = true, stats) do
-    game = Hangman.new_game
+    game = :rpc.call(:hangman@habu, Hangman, :new_game, [])
     tally = Hangman.tally(game)
     
     interact(game, tally, stats)
@@ -105,11 +106,13 @@ The word was \"#{IO.ANSI.format([:green, letters])}\".")
 
   def again(_no_more, stats) do
     games = "game" <> plural(stats.games)
-    IO.puts("Very well.")
-    IO.puts("You played #{int2wd(stats.games)} #{games} and won #{int2wd(stats.wins)}.")
-    IO.puts("The average word length was #{Float.round(stats.letters/stats.games)} letters.")
-    IO.puts("You used an average of #{Float.round(stats.guesses/stats.games)} of your allocated guesses.")
-    IO.puts("See you next time!\n")
+    IO.puts("
+     Very well.
+     You played #{int2wd(stats.games)} #{games} and won #{int2wd(stats.wins)}.
+     The average word length was #{Float.round(stats.letters/stats.games, 1)} letters.
+     You used an average of #{Float.round(stats.guesses/stats.games, 1)} of your allocated guesses.
+     See you next time!
+")
   end
 
   def prompt(string) do
@@ -119,7 +122,7 @@ The word was \"#{IO.ANSI.format([:green, letters])}\".")
     |> String.downcase
   end
 
-  defp plural(0), do: ""
+  defp plural(1), do: ""
   defp plural(_), do: "s"
 
   defp int2wd(0), do: "none"
@@ -140,7 +143,7 @@ The word was \"#{IO.ANSI.format([:green, letters])}\".")
   defp int2wd(15), do: "fifteen"
   defp int2wd(16), do: "sixteen"
   defp int2wd(17), do: "seventeen"
-  defp int2wd(18), do: "eightteen"
+  defp int2wd(18), do: "eighteen"
   defp int2wd(19), do: "nineteen"
   defp int2wd(20), do: "twenty"
   defp int2wd(n),  do: n

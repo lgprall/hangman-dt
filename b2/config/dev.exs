@@ -6,7 +6,7 @@ import Config
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we use it
 # with esbuild to bundle .js and .css sources.
-config :b1, B1Web.Endpoint,
+config :b2, B2Web.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
   http: [ip: {0, 0, 0, 0}, port: 4000],
@@ -14,7 +14,7 @@ config :b1, B1Web.Endpoint,
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
-  secret_key_base: "s5+UL/qV5tFR33OrIgN55AKcPRVo63VP0LFhpMLjhPLqZK2nBw/0ahwGh9yU5BcF",
+  secret_key_base: "P482xHeqJDtKwfrIkkqngB7s+LWWFpADjrm+VAY+DYYHFTMC+j/c+OWe30Yk280q",
   watchers: [
     # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)
     esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]}
@@ -45,12 +45,12 @@ config :b1, B1Web.Endpoint,
 # different ports.
 
 # Watch static and templates for browser reloading.
-config :b1, B1Web.Endpoint,
+config :b2, B2Web.Endpoint,
   live_reload: [
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
-      ~r"lib/b1_web/(live|views)/.*(ex)$",
-      ~r"lib/b1_web/templates/.*(eex)$"
+      ~r"lib/b2_web/(live|views)/.*(ex)$",
+      ~r"lib/b2_web/templates/.*(eex)$"
     ]
   ]
 

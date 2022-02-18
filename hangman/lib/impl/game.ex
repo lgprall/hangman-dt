@@ -44,6 +44,7 @@ defmodule Hangman.Impl.Game do
 
   @spec make_move(t, String.t) :: {t, Type.tally}
   def make_move(game, guess) do
+    guess = guess |> String.codepoints |> hd
     check_used( game, guess, MapSet.member?(game.used, guess))
     |> return_with_tally()
   end

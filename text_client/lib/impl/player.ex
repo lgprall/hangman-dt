@@ -42,7 +42,8 @@ defmodule TextClient.Impl.Player do
   end
 
   def interact(game, tally = %{game_state: :won}, stats ) do
-    letters = (:sys.get_state(game)).letters
+    {rg,_pid} = :sys.get_state(game)
+    letters = rg.letters
     IO.puts("Congratulatons, you won!
 The word was \"#{IO.ANSI.format([:green, letters])}\".")
     stats = %{
@@ -59,7 +60,8 @@ The word was \"#{IO.ANSI.format([:green, letters])}\".")
   end
 
   def interact(game, tally = %{game_state: :lost}, stats )do
-    letters = (:sys.get_state(game)).letters
+    {rg,_pid} = :sys.get_state(game)
+    letters = rg.letters
     IO.puts("Sorry. You lost.
 The word was \"#{IO.ANSI.format([:green, letters])}\".")
     stats = %{

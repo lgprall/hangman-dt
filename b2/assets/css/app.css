@@ -35,6 +35,11 @@ body {
 
 /* Stylin' */
 
+.result {
+  font-size: 125%;
+  color: blue;
+}
+
 .alphabet {
   display: flex;
   flex-wrap: wrap;

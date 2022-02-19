@@ -8,9 +8,9 @@ defmodule B2Web.Live.Game.Result do
 
   def render(assigns) do
     ~H"""
-    <h4>
-      The word was: <%= @word %>
-    </h4>
+    <div class = "result">
+      The word was: "<%= @word %>"
+    </div>
     """
 
 

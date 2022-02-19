@@ -32,3 +32,5 @@ b2-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Ignore swap files
+*.swp

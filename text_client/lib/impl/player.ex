@@ -1,11 +1,12 @@
 defmodule TextClient.Impl.Player do
-  @typep game :: Hangman.game()
-  @typep tally :: Hangman.tally()
+  @typep game :: Hangman.game
+  @typep tally :: Hangman.tally
   @typep stats :: %{
            games:   integer,
            wins:    integer,
            letters: integer,
-           guesses: integer
+           guesses: integer,
+           flag:    integer
          }
 
   @spec start :: :ok
@@ -50,7 +51,7 @@ defmodule TextClient.Impl.Player do
 
   def interact(game, _tally, stats = %{flag: 0}) do
     stats = %{stats | flag: 1}
-    feedback_for(game, stats)
+    IO.puts(feedback_for(game, stats))
     guess = prompt("\nGuess the first letter: ")
     {game, tally} = Hangman.make_move(game, guess)
 
@@ -58,7 +59,7 @@ defmodule TextClient.Impl.Player do
   end
 
   def interact(game, tally, stats) do
-    feedback_for(game, stats)
+    IO.puts(feedback_for(game, stats))
     IO.puts(IO.ANSI.format(show_stats(tally)))
     guess = prompt("Next guess: ")
     {game, tally} = Hangman.make_move(game, guess)
@@ -76,42 +77,22 @@ defmodule TextClient.Impl.Player do
     ]
   end
 
-  def prompt(prompt) do
-    IO.gets(prompt)
-    |> String.trim()
-    |> String.codepoints()
-    |> hd
-    |> String.downcase()
-  end
+  def feedback_for(game = %{game_state: :initializing}, _stats = %{games: 0}), do: "\nWelcome to the game!  I'm thinking of a word of #{int2wd(length(game.letters))} letters."
 
-  def feedback_for(game = %{game_state: :initializing}, _stats = %{games: 0}) do
-    IO.puts("\nWelcome to the game!")
-    IO.puts("I'm thinking of a word of #{int2wd(length(game.letters))} letters.")
-  end
+  def feedback_for(game = %{game_state: :initializing}, _stats), do: "\nThis time I'm thinking of a word of #{int2wd(length(game.letters))} letters."
 
-  def feedback_for(game = %{game_state: :initializing}, _stats) do
-    IO.puts("\nThis time I'm thinking of a word of #{int2wd(length(game.letters))} letters.")
-  end
+  def feedback_for(_game = %{game_state: :invalid}, _stats), do: "That is an invalid guess. It must be lowercase letter from \"a\" to \"z\"."
 
-  def feedback_for(_game = %{game_state: :invalid}, _stats) do
-    IO.puts("That is an invalid guess. It must be lowercase letter from \"a\" to \"z\".")
-  end
+  def feedback_for(_game = %{game_state: :already_used}, _stats), do: "You've already used that letter."
 
-  def feedback_for(_game = %{game_state: :already_used}, _stats) do
-    IO.puts("You've already used that letter.")
-  end
+  def feedback_for(_game = %{game_state: :good_guess}, _stats), do: "Good guess."
 
-  def feedback_for(_game = %{game_state: :good_guess}, _stats) do
-    IO.puts("Good guess.")
-  end
-
-  def feedback_for(_game = %{game_state: :bad_guess}, _stats) do
-    IO.puts("Sorry. That letter is not in the word.")
-  end
+  def feedback_for(_game = %{game_state: :bad_guess}, _stats), do: "Sorry. That letter is not in the word."
 
   def again(true, stats) do
     game = Hangman.new_game()
     tally = Hangman.tally(game)
+    stats = %{stats | flag: 0}
     interact(game, tally, stats)
   end
 
@@ -122,32 +103,40 @@ defmodule TextClient.Impl.Player do
       You played #{int2wd(stats.games)} #{games} and won #{int2wd(stats.wins)}.
       The average word length was #{Float.round(stats.letters / stats.games, 1)} letters.
       You used an average of #{Float.round(stats.guesses / stats.games, 1)} of your allocated guesses.
-      See you next time!")
+      See you next time!
+      ")
   end
 
-  def plural(1), do: ""
-  def plural(_), do: "s"
+  def prompt(prompt) do
+    IO.gets(prompt)
+    |> String.codepoints()
+    |> hd
+    |> String.downcase()
+  end
 
-  def int2wd(0), do: "none"
-  def int2wd(1), do: "one"
-  def int2wd(2), do: "two"
-  def int2wd(3), do: "three"
-  def int2wd(4), do: "four"
-  def int2wd(5), do: "five"
-  def int2wd(6), do: "six"
-  def int2wd(7), do: "seven"
-  def int2wd(8), do: "eight"
-  def int2wd(9), do: "nine"
-  def int2wd(10), do: "ten"
-  def int2wd(11), do: "eleven"
-  def int2wd(12), do: "twelve"
-  def int2wd(13), do: "thirteen"
-  def int2wd(14), do: "fourteen"
-  def int2wd(15), do: "fifteen"
-  def int2wd(16), do: "sixteen"
-  def int2wd(17), do: "seventeen"
-  def int2wd(18), do: "eighteen"
-  def int2wd(19), do: "nineteen"
-  def int2wd(20), do: "twenty"
-  def int2wd(n), do: n
+  defp plural(1), do: ""
+  defp plural(_), do: "s"
+
+  defp int2wd(0), do: "none"
+  defp int2wd(1), do: "one"
+  defp int2wd(2), do: "two"
+  defp int2wd(3), do: "three"
+  defp int2wd(4), do: "four"
+  defp int2wd(5), do: "five"
+  defp int2wd(6), do: "six"
+  defp int2wd(7), do: "seven"
+  defp int2wd(8), do: "eight"
+  defp int2wd(9), do: "nine"
+  defp int2wd(10), do: "ten"
+  defp int2wd(11), do: "eleven"
+  defp int2wd(12), do: "twelve"
+  defp int2wd(13), do: "thirteen"
+  defp int2wd(14), do: "fourteen"
+  defp int2wd(15), do: "fifteen"
+  defp int2wd(16), do: "sixteen"
+  defp int2wd(17), do: "seventeen"
+  defp int2wd(18), do: "eighteen"
+  defp int2wd(19), do: "nineteen"
+  defp int2wd(20), do: "twenty"
+  defp int2wd(n), do: n
 end

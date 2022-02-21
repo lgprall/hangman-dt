@@ -43,6 +43,7 @@ defmodule Hangman.Impl.Game do
   end
 
   def make_move(game, guess) do
+    guess = guess |> String.codepoints |> hd
     accept_move(game, guess, MapSet.member?(game.used, guess))
     |> return_with_tally
   end
